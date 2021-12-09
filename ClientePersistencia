@@ -1,0 +1,142 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class ClientePersistencia {
+	
+	
+	private final static String MySQL_DB_USUARIO = "root";
+	private final static String MySQL_DB_PASSWORD = "root";
+	private final static String MySQL_DB_DRIVER = "com.mysql.cj.jdbc.Driver";
+	private final static String MySQL_DB_URL = "jdbc:mysql://localhost/";
+	
+	private static Connection conn = null;
+	
+	public static Connection getMySQLConnection(String Database){
+		
+		try {
+			Class.forName(MySQL_DB_DRIVER);
+			conn = DriverManager.getConnection(MySQL_DB_URL + Database + "?&useSSL=false", MySQL_DB_USUARIO, MySQL_DB_PASSWORD);
+		}catch (ClassNotFoundException ex) {
+			System.out.println("Error 1.-" + ex.getMessage());	
+		}catch (SQLException ex) {
+			System.out.println("Error 2.-" + ex.getMessage());
+	}
+		return conn;
+}
+	
+	public static void desconexion() {
+		try {
+			conn.close();
+		}catch (SQLException ex) {
+			System.out.println("Error 3.-" + ex.getMessage());
+	}
+	}
+	public static int createCliente(String nombre, String apellidos, String email, String dni, String clave) {
+		
+		int id=0;
+		
+		String sentencia = "INSERT INTO clientes VALUES(null, '"+ nombre+"', '"+ apellidos+"','"+ email +"','"+ dni+"','"+ clave+"',)";
+		try {
+			conn = getMySQLConnection("hotel");
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate(sentencia);
+			stmt.close();
+			Statement stmt2 = conn.createStatement();
+			ResultSet rs = stmt2.executeQuery("SELECT MAX(idclientes) FROM clientes");
+			if (rs.next()) {
+				
+				id = rs.getInt(1);
+			
+			
+			}}
+			catch(SQLException ex){
+				System.out.println("Error al crear al cliente");
+				
+			}
+		
+			desconexion();
+			return id;
+		}	
+	
+
+ 
+	
+	
+	
+	public static String readCliente(int idClientes, String campo)   {
+		
+		
+		String sentencia = "SELECT" + campo+ "FROM clientes WHERE idclientes LIKE"+ idClientes;
+		String ValorCampo = "";
+		conn = getMySQLConnection("hotel");
+		try {
+			conn = getMySQLConnection("hotel");
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(sentencia);
+		
+		if (rs.next()) {
+			
+			ValorCampo = rs.getString(1);
+		
+		
+		}} catch (SQLException ex){
+			System.out.println("Error al leer al cliente");
+			
+		}
+	
+		desconexion();
+		return ValorCampo;
+	}
+		
+	
+	public static boolean updateCliente(int idClientes, String campo, String nuevoValor) {
+		/* Actualiza el valor de la columna "campo" del cliente identificado por "idCliente". Devuelve true si se ha logrado actualizar. */
+		
+		boolean actualizar;
+		
+		String sentencia = "UPDATE clientes SET" + campo+ "='"+ nuevoValor + "' WHERE idclientes LIKE" + idClientes;
+		try {
+		conn = getMySQLConnection("hotel");
+		Statement stmt = conn.createStatement();
+		stmt.executeUpdate(sentencia);
+		actualizar = true;
+		
+		} 
+		catch (SQLException ex){
+			actualizar = false;
+		
+	}
+		
+	
+		
+		return actualizar;
+		
+		
+	}
+	public static boolean deleteCliente(int idClientes) {
+		
+		boolean eliminar;
+		
+		String sentencia = "DELETE FROM clientes WHERE idclientes LIKE" + idClientes;
+		try {
+		conn = getMySQLConnection("hotel");
+		Statement stmt = conn.createStatement();
+		stmt.executeUpdate(sentencia);
+		eliminar = true;
+		
+		} 
+		catch (SQLException ex){
+			eliminar = false;
+		
+	}
+		
+	
+		
+		return eliminar;
+	
+		
+	}
+}
